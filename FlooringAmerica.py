@@ -3,6 +3,7 @@ import sys
 import os
 from DriverManager import DriverManager
 from FAContactUsPage import FAContactPage
+from Login import Login
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
 pageobject_path = os.path.join(current_directory, "..", "PageObject")
@@ -15,8 +16,13 @@ def run_test_case():
 
     try:
         contact_page = FAContactPage(driver)
-        contact_page.Navigate_to_Site(driver,"https://www.caseycarpetoflascruces.com/contact-us")
-        contact_page.submit_form(driver) 
+        login_page=Login(driver)
+        contact_page.Navigate_to_Site(driver,"https://www.cottagefloorsflooringamerica.com/contact-us")
+        returned_email = contact_page.submit_form(driver)
+        login_page.user_Login_to_siteadmin(driver)
+        locationNumber, locationName = contact_page.get_location_details(driver)        
+        login_page.user_Login_to_yodle(driver)
+        contact_page.validates_form_in_centermark(driver,locationNumber, locationName,returned_email)
     except Exception as e:
         print(str(e)) 
 
@@ -26,6 +32,7 @@ def run_test_case():
 
 # Run the test case
 run_test_case()
+
 
 
 

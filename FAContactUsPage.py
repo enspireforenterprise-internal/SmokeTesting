@@ -1,3 +1,4 @@
+import datetime
 import time
 from tkinter import BROWSE
 from selenium.common.exceptions import WebDriverException
@@ -12,7 +13,13 @@ class FAContactPage:
         self.driver=driver
     
     def find_my_element(self, by_locator):
-        element = WebDriverWait(self.driver, 10, 500).until(EC.visibility_of_element_located(by_locator))
+        element = WebDriverWait(self.driver, 10, 500).until(EC.presence_of_element_located(by_locator))
+        self.driver.execute_script("arguments[0].scrollIntoView();", element)
+        return element
+    
+    def find_my_clickable_element(self, by_locator):
+        element = WebDriverWait(self.driver, 10, 500).until(EC.element_to_be_clickable(by_locator))
+        
         return element
 
     # Function to submit the form on the contact us page
@@ -29,7 +36,7 @@ class FAContactPage:
                     print("URL is redirecting")
 
 
-                #driver.find_element(By.LINK_TEXT,"Contact Us").click()
+                #self.find_my_element(By.LINK_TEXT,"Contact Us").click()
                 print("url opened")
             except WebDriverException as e:
                 if "ERR_CONNECTION_TIMED_OUT" in str(e):
@@ -44,51 +51,87 @@ class FAContactPage:
         #try:
             print("form page")
             
-            self.find_my_element((By.NAME,"FirstName")).send_keys("Test Lead")
-         
-          #  driver.find_element(By.NAME,"FirstName").send_keys("Test Lead")
-         
-            driver.find_element(By.NAME,"LastName").send_keys("CCA Please Ignore")
-            driver.find_element(By.XPATH,"//*[text()='Call Me']")
-            driver.find_element(By.XPATH,"//button[text()='Email Me']")
-            driver.find_element(By.XPATH,"//input[@placeholder='Enter your phone number']").send_keys("9056428161")
-            driver.find_element(By.NAME,"EmailAddress").send_keys("testleadfa07252023@ccapleaseignore.com")
-            driver.find_element(By.NAME,"PostalCode").send_keys("99501")
-           # driver.find_element(By.XPATH,"//label[text()='My Preferred Store']//following-sibling::div/input[@name='MyStore']")
-            driver.find_element(By.NAME,"OpportunityNotes").send_keys("Test Lead")
-            print("last stpe ")
-            # scroll_distance = 800  # Adjust the value based on how much you want to scroll
-            # driver.execute_script(f"window.scrollBy(0, {scroll_distance});")
-            send_button=driver.find_element(By.XPATH,"//button[text()='Send Message']")
-            # driver.execute_script("arguments[0].scrollIntoView();", send_button)
-            #wait = WebDriverWait(driver, 10)  # Maximum wait time of 10 seconds
-           # element_to_scroll = wait.until(EC.visibility_of_element_located((By.XPATH, "//button[text()='Send Message']")))
+            self.find_my_element((By.NAME,"FirstName")).send_keys("FA Test Lead")
+                 
+            self.find_my_element((By.NAME,"LastName")).send_keys("CCA Please Ignore")
+    
+            self.find_my_element((By.XPATH,"//input[@placeholder='Enter your phone number']")).send_keys("9056428161")
+            formatted_date = self.get_current_date_monthday_year_format()
+            #print(formatted_date)
+            email_address= f"testleadfa{formatted_date}@ccapleaseignore.com"
+            self.find_my_element((By.NAME,"EmailAddress")).send_keys(email_address)
+            self.find_my_element((By.NAME,"PostalCode")).send_keys("99501")
+            self.find_my_element((By.NAME,"OpportunityNotes")).send_keys("Test Lead")
+           # print("last stpe ")
+            send_button=self.find_my_element((By.XPATH,"//button[text()='Send Message']"))
+          
             script = f"arguments[0].scrollIntoView({{behavior: 'auto', block: 'center'}});" 
-            driver.execute_script(script, send_button)
-    # Step 4: Scroll to the element using JavaScript
-            #driver.execute_script("arguments[0].scrollIntoView();", element_to_scroll)
-            time.sleep(5)
+            driver.execute_script(script, send_button)  
+            time.sleep(1)
             send_button.click()
-            time.sleep(5)
             print("form submitted")
-            # time.sleep(10)
-        
-        #     print(e)
-        #     print("2.Program interrupted by user.")
-        # try:
-            #CSS selector
-            message=driver.find_element(By.XPATH,"//section[@class='section-header   ']//h3/strong").text        
-            print(message)
-            time.sleep(10)
-            assert "THANK YOU" in message
-            # #driver.close()
-            print("passed")
-            time.sleep(5)
-            driver.find_element(By.LINK_TEXT, "Book Appointment")
-        # except Exception as e:
-        #     print(e)
-        #     print("3.Program interrupted by user.")
-        # finally:
-            #self.driver.quit()
-            print("browser  close")
+            #time.sleep(10)        
+            #print("browser  close")
+            try:
+                WebDriverWait(driver, 10).until(
+            EC.text_to_be_present_in_element((By.XPATH, "//h3/strong"), "THANK YOU")
+        )
+                print("Thank You message found")
+            except Exception as e:
+                print("Unable to find Thank You message:", e)
+            return email_address
 
+    
+    def get_current_date_monthday_year_format(self):
+        current_date = datetime.datetime.now().strftime("%m%d%Y")
+        return current_date
+    
+    def read_credentials_from_file(self,file_name):
+        credentials = {}
+        with open(file_name, "r") as file:
+            for line in file:
+                key, value = line.strip().split(": ")
+                credentials[key] = value
+        print("Credentials:", credentials)  # Add this line for debugging
+        return credentials
+
+    def switch_to_tab_by_index(self,driver, index):
+        new_tab=driver.window_handles[index]
+        driver.switch_to.window(new_tab)
+
+    def get_location_details(self,driver):
+        time.sleep(5)
+        self.find_my_element((By.XPATH,"(//*[contains(text(),'Manage Location')])[1]")).click()
+        locationNumber=self.find_my_element((By.XPATH,"//*[contains(text(),'Location Number')]/following-sibling::label")).text
+        locationName=self.find_my_element((By.XPATH,"//*[contains(text(),'Location Name')]/following-sibling::label")).text
+        print (locationNumber)
+        print(locationName)
+        return locationNumber , locationName
+    
+    
+    # Function to  validate the submitted form through email
+    def validates_form_in_centermark(self, driver,LocNumber,LocName, returned_email_address):
+        
+        SearchBox=self.find_my_element((By.ID,"filterText"))
+        SearchBox.send_keys(LocNumber)
+        SearchBox.send_keys(Keys.ENTER)
+        self.find_my_element((By.XPATH,f"//*[text()='{LocName}']")).click()
+        time.sleep(3)
+        RecentEmails=driver.find_elements(By.XPATH,"//table[@id='contacts']/tbody/tr/td[3]/span")
+        for RecentEmail in RecentEmails:
+            email_text=RecentEmail.text
+            print(email_text)
+           # count=0
+            #print(email_text)
+            if returned_email_address in email_text:
+                print("Email Found in Yodle", returned_email_address)
+                #count+=1
+                print(count)
+                break
+
+    def open_new_tab_and_focus(self, url):
+        self.driver.execute_script("window.open('{}', '_blank');".format(url))  # Open URL in a new tab
+        time.sleep(1)
+        self.driver.switch_to.window(self.driver.window_handles[-1])  # Switch to the newly opened tab
+
+        
