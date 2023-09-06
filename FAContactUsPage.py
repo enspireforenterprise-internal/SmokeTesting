@@ -32,11 +32,10 @@ class FAContactPage:
                 print(Current_Url)
                 if Current_Url==url:
                     print("URL is correct")
+                    print(Current_Url)
                 else:
                     print("URL is redirecting")
-
-
-                #self.find_my_element(By.LINK_TEXT,"Contact Us").click()
+                    print(Current_Url)
                 print("url opened")
             except WebDriverException as e:
                 if "ERR_CONNECTION_TIMED_OUT" in str(e):
@@ -49,6 +48,7 @@ class FAContactPage:
 
     def submit_form(self, driver):
         #try:
+            #self.find_my_element((By.LINK_TEXT,"Contact Us")).click()
             print("form page")
             
             self.find_my_element((By.NAME,"FirstName")).send_keys("FA Test Lead")
@@ -115,7 +115,7 @@ class FAContactPage:
         SearchBox=self.find_my_element((By.ID,"filterText"))
         SearchBox.send_keys(LocNumber)
         SearchBox.send_keys(Keys.ENTER)
-        self.find_my_element((By.XPATH,f"//*[text()='{LocName}']")).click()
+        self.find_my_element((By.XPATH,f'//*[text()="{LocName}"]')).click()
         time.sleep(3)
         RecentEmails=driver.find_elements(By.XPATH,"//table[@id='contacts']/tbody/tr/td[3]/span")
         for RecentEmail in RecentEmails:
@@ -126,7 +126,7 @@ class FAContactPage:
             if returned_email_address in email_text:
                 print("Email Found in Yodle", returned_email_address)
                 #count+=1
-                print(count)
+                driver.get_screenshot_as_file("Leads.png")
                 break
 
     def open_new_tab_and_focus(self, url):

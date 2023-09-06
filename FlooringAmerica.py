@@ -17,7 +17,7 @@ def run_test_case():
     try:
         contact_page = FAContactPage(driver)
         login_page=Login(driver)
-        contact_page.Navigate_to_Site(driver,"https://www.cottagefloorsflooringamerica.com/contact-us")
+        contact_page.Navigate_to_Site(driver,"https://www.perrysflooringamerica.com/contact-us")
         returned_email = contact_page.submit_form(driver)
         login_page.user_Login_to_siteadmin(driver)
         locationNumber, locationName = contact_page.get_location_details(driver)        
@@ -28,7 +28,7 @@ def run_test_case():
 
     finally:
         print("done")
-        #driver_manager.quit_driver()
+        driver_manager.quit_driver()
 
 # Run the test case
 run_test_case()
