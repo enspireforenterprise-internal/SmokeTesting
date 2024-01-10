@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-#from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.chrome.options import Options
 
 
 
@@ -11,7 +11,10 @@ class DriverManager:
     def start_driver(self):
         if not self.driver:
             ser = Service("C:\drivers\chromedriver.exe")
-            self.driver = webdriver.Chrome(service=ser)  # You can use other browser drivers here if needed
+            self.driver = webdriver.Chrome(service=ser)
+            chrome_options = Options()
+            chrome_options.add_argument("--disable-http2")
+            driver = webdriver.Chrome(options=chrome_options)
 
     def get_driver(self):
         return self.driver
