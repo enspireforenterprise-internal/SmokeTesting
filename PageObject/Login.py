@@ -24,7 +24,7 @@ class Login():
             # current_url = driver.current_url
             new_url = url + '/siteadmin'
             print("navigating to siteadmin")
-            driver.get(new_url)
+            driver.get(new_url) 
             print("have to read cred")
             # self.common_page.switch_to_tab_by_index(driver, 1)
             credentials = self.common_page.read_credentials_from_file("credentials.txt")
